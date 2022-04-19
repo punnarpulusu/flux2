@@ -26,8 +26,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fluxcd/pkg/kustomize/filesys"
 	"github.com/fluxcd/pkg/untar"
-	"sigs.k8s.io/kustomize/api/filesys"
 
 	"github.com/fluxcd/flux2/pkg/manifestgen/kustomization"
 )
@@ -126,8 +126,11 @@ func build(base, output string) error {
 		return err
 	}
 
-	fs := filesys.MakeFsOnDisk()
-	if err := fs.WriteFile(output, resources); err != nil {
+	fs, err := filesys.MakeFsOnDiskSecure(base)
+	if err != nil {
+		return err
+	}
+	if err = fs.WriteFile(output, resources); err != nil {
 		return err
 	}
 
